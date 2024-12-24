@@ -24,7 +24,7 @@ While there is margin for improvement, these graphic displays are interactive an
 
 ### 2.2 Installation
 Clone the following repository from GitHub:
-
+https://github.com/Rickveg/HabitTracker.git
 
 ### 2.3. Dependencies
 pip install -r requirements.txt
