@@ -1,6 +1,6 @@
 # Happy Habit Tracker App
 
-A fully functional habit tracker app to manage your recurrent habits and improve your lifestyle
+A fully functional habit tracker app to manage your recurrent habits and improve your lifestyle.
 
 ## 1. Introduction
 This project is the outcome of a university assignment having the purpose to build a simple app following an OOP approach.
