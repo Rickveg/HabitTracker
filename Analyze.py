@@ -3,105 +3,134 @@ from datetime import date, datetime, timedelta
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import questionary
-from rich.console import Console
 from rich.table import Table
 
 from DBManager import DatabaseManager
-
-console = Console()
+from HabitManager import HabitManager
 
 
 class HabitAnalyzer:
-    """
-    Provides methods to analyze and manage user habits, including sorting
-    habit summaries, viewing habit charts, and displaying habit data.
-
-    The class leverages a `DatabaseManager` for CRUD operations on
-    habit-related information. It offers an interactive menu and
-    visual representation of habits and their performance.
-
-    :ivar db_manager: Instance managing database operations for habit data.
-    :type db_manager: DatabaseManager
-    """
-    def __init__(self):
+    """ Provides methods to analyze user habits, including sorting habit summaries and viewing different chart types."""
+    def __init__(self, text_theme):
         self.db_manager = DatabaseManager()
-
-    def analyze(self):
-        """
-        Analyze and evaluate habits based on user-selected options. Provides a menu
-        for habit data visualization including sorting, checking streak progress,
-        reviewing performance, and recent check-off activities.
-
-        :return: None
-        """
-        console.print(
-            "[bold blue][size=16]*** Welcome to your Habit Analyze Menu! ***[/size][/bold blue]\n")
-        data = self.view_habits_summary()
-
-        while True:
-            choice = questionary.select(
-                "Please select an analysis option:",
-                choices=[
-                    "[1] Sort the Habit Summary Table",
-                    "[2] View Charts",
-                    "[3] Return to Main Menu"
-                ]
-            ).ask()
-
-            if choice == "[1] Sort the Habit Summary Table":
-                if data:
-                    self.sort_habits_summary(data=data)
-                else:
-                    console.print("[bold red]No habits available for sorting.[/bold red]")
-
-            # Charts SubMenu
-            elif choice == "[2] View Charts":
-                while True:
-                    choice = questionary.select(
-                        "Please select an option:",
-                        choices=[
-                            "[1] View a Habit's Streak Progress",
-                            "[2] Review Habit Performance",
-                            "[3] Check Recent Check-Off Activity",
-                            "[4] Cancel"
-                        ]
-                    ).ask()
-
-                    if choice == "[1] View a Habit's Streak Progress":
-                        self.view_habit_streak_progress()
-                    elif choice == "[2] Review Habit Performance":
-                        self.view_habit_monthly_performance()
-                    elif choice == "[3] Check Recent Check-Off Activity":
-                        self.view_checkoff_recent_activity()
-                    elif choice == "[4] Cancel":
-                        return
-
-            elif choice == "[3] Return to Main Menu":
-                return
-
+        self.manager = HabitManager(text_theme)
+        self.console, self.custom_style = text_theme
 
     # SUMMARY TABLE
 
+    def view_habits_summary(self):
+        """
+        Provides a comprehensive summary of all habits stored in the database.
+
+        This method retrieves habit data from the database, calculates relevant metrics
+        for each habit, and organizes the information into a structured summary.
+
+        The summary is then presented in a formatted table for visualization purposes and
+        is returned as processed data.
+
+        :returns:
+            A list of habit information organized in the following structure:
+
+            - Name (str): The name of the habit.
+            - Recurrence (str): The habit's recurrence frequency ("Daily" or "Weekly").
+            - Creation Date (datetime): The date when the habit was created.
+            - Status (str): The current status of the habit ("Active" or another defined status).
+            - Completion Date (datetime or None): The date of completion if completed.
+            - Check_off Status (str): Indicates if the habit is marked as "Checked_Off"
+              or "Not Checked_Off", for current day.
+            - Current Streak (int): The current streak count for the habit.
+            - Longest Streak (int): The longest recorded streak for the habit.
+            - % Performance (float): The performance percentage of the habit over its lifecycle.
+            - Rank (str): A textual ranking derived from the performance percentage
+              ("Outstanding", "Excellent", "Very Good", "Good", "Inconsistent", "Poor", or "Unknown").
+
+        """
+        habits = self.db_manager.fetch_all_habits()
+        if not habits:
+            self.console.print("[bold red]No habits found.[/bold red]")
+            return
+
+        data = []
+
+        # Attribute a rank to a % value
+        rank_mapping = {
+            (100, 101): "Outstanding",
+            (91, 100): "Excellent",
+            (70, 91): "Very Good",
+            (60, 70): "Good",
+            (40, 60): "Inconsistent",
+            (0, 40): "Poor"
+        }
+
+        # Get all stats for each habit in the database, including streaks and performance.
+        for habit in habits:
+            habit_id, name, description, recurrence, *_ = habit
+            creation_date = self.db_manager.get_creation_date(habit_id)
+            status = self.db_manager.get_status(habit_id)
+            completion_date = self.db_manager.get_completion_date(habit_id)
+            current_streak = self.db_manager.get_current_streak(habit_id)
+            if isinstance(current_streak, str):
+                try:
+                    current_streak = int(current_streak.split()[0])
+                except ValueError:
+                    current_streak = 0
+            longest_streak = self.db_manager.get_longest_streak(habit_id)
+            habit_performance = self.db_manager.get_habit_performance(habit_id, creation_date)
+
+            # Determine rank based on performance
+            rank = next((label for range_key, label in rank_mapping.items()
+                         if range_key[0] <= habit_performance < range_key[1]), "Unknown")
+
+            # Check checked_off status for the habit
+            checked_off = (self.db_manager.is_habit_checked_off_today(habit_id) if recurrence == "Daily"
+                           else self.db_manager.is_habit_checked_off_this_week(habit_id))
+            check_off_status = "Checked_Off" if checked_off else "Not Checked_Off"
+
+            # Append habit data
+            data.append([
+                name, recurrence, creation_date, status, completion_date,
+                check_off_status, current_streak, longest_streak,
+                habit_performance, rank
+            ])
+
+        # Create and display a summary table
+        df_table = Table(title="Habit Summary", header_style="blue bold", show_header=True)
+        columns = [
+            ("Name", "bright_white"), ("Recurrence", "cyan"),
+            ("Creation Date", "cyan"), ("Status", "cyan"),
+            ("Completion Date", "cyan"), ("Check_off Status", None),
+            ("Current Streak", None), ("Longest Streak", None),
+            ("% Performance", None), ("Rank", None)
+        ]
+        for col_name, col_style in columns:
+            df_table.add_column(col_name, justify="center" if col_style else "left",
+                                style=col_style, no_wrap=(col_name == "Name"))
+
+        # Apply text enrichment in conditional formatting
+        for row in data:
+            check_off_status_style = "green" if row[5] == "Checked_Off" else "red"
+            current_streak_style = "cyan" if row[6] > 0 else "red"
+            longest_streak_style = "cyan" if row[7] > 0 else "red"
+            habit_performance_style = "green" if row[8] >= 60 else "red"
+            rank_style = "green" if row[9] in ["Outstanding", "Excellent", "Very Good"] else "red"
+
+            df_table.add_row(
+                row[0], row[1], str(row[2]), row[3] or "N/A", str(row[4]) if row[4] else "N/A",
+                f"[{check_off_status_style}]{row[5]}[/]",
+                f"[{current_streak_style}]{row[6]}[/]",
+                f"[{longest_streak_style}]{row[7]}[/]",
+                f"[{habit_performance_style}]{row[8]:.2f}%[/]",
+                f"[{rank_style}]{row[9]}[/]"
+            )
+
+        self.console.print(df_table)
+        return data
+
     @staticmethod
-    def sort_habits_summary(data):
+    def sort_habits_summary(data, console=None, custom_style=None):
         """
         Sort a list of habits based on user-selected attributes and display the sorted
         data in a formatted table.
-
-        This method enables users to sort data by a specific attribute such as Name,
-        Recurrence, Status, etc., in ascending or descending order. The sorted data
-        is displayed in a visually styled table with color-coded values based on
-        specific conditions.
-
-        :param data: List of habit information, where each habit is represented as
-            a list or tuple. Each entry must contain elements in a specific order
-            corresponding to the sort map and table column definitions.
-        :type data: list
-        :raises KeyError: If the sort choice is not found in the pre-defined sort map.
-        :raises ValueError: If the `sort_choice` or `ascending_order` inputs are
-            invalid or missing.
-        :return: None if the sorting operation is canceled by the user.
-        :rtype: None
         """
         sort_options = [
             "Name", "Recurrence", "Creation Date", "Status", "Completion Date",
@@ -112,7 +141,7 @@ class HabitAnalyzer:
         # Prompt user for sorting attribute
         sort_choice = questionary.select(
             "Select attribute to sort by:",
-            choices=sort_options
+            choices=sort_options, style=custom_style
         ).ask()
 
         if sort_choice == "Cancel":
@@ -153,7 +182,7 @@ class HabitAnalyzer:
             check_off_status_style = "green" if row[5] == "Checked_Off" else "red"
             current_streak_style = "cyan" if row[6] > 0 else "red"
             longest_streak_style = "cyan" if row[7] > 0 else "red"
-            habit_performance_style = "green" if row[8] >= 60 else "red"
+            habit_performance_style = "green" if row[8] >= 65 else "red"
             rank_style = "green" if row[9] in ["Outstanding", "Excellent", "Very Good"] else "red"
 
             df_table.add_row(
@@ -167,111 +196,7 @@ class HabitAnalyzer:
             )
         console.print(df_table)
 
-    def view_habits_summary(self):
-        """
-        Provides a comprehensive summary of all habits stored in the database.
-
-        This method retrieves habit data from the database, calculates relevant metrics
-        for each habit, and organizes the information into a structured summary. The
-        summary includes metrics such as current streak, longest streak, habit performance
-        percentage, and a corresponding rank based on performance. It also checks if
-        the habit is marked as completed for the current recurrence cycle (daily or weekly).
-
-        The summary is then presented in a formatted table for visualization purposes and
-        is returned as processed data.
-
-        :returns:
-            A list of habit information organized in the following structure:
-
-            - Name (str): The name of the habit.
-            - Recurrence (str): The habit's recurrence frequency ("Daily" or "Weekly").
-            - Creation Date (datetime): The date when the habit was created.
-            - Status (str): The current status of the habit ("Active" or another defined status).
-            - Completion Date (datetime or None): The date of completion if completed.
-            - Check_off Status (str): Indicates if the habit is marked as "Checked_Off"
-              or "Not Checked_Off".
-            - Current Streak (int): The current streak count for the habit.
-            - Longest Streak (int): The longest recorded streak for the habit.
-            - % Performance (float): The performance percentage of the habit over its lifecycle.
-            - Rank (str): A textual ranking derived from the performance percentage
-              ("Outstanding", "Excellent", "Very Good", "Good", "Inconsistent", "Poor", or "Unknown").
-
-        """
-        habits = self.db_manager.fetch_all_habits()
-        if not habits:
-            console.print("[bold red]No habits found.[/bold red]")
-            return
-
-        data = []
-        rank_mapping = {
-            (100, 101): "Outstanding",
-            (91, 100): "Excellent",
-            (71, 91): "Very Good",
-            (61, 71): "Good",
-            (51, 61): "Inconsistent",
-            (0, 51): "Poor"
-        }
-
-        for habit in habits:
-            habit_id, name, description, recurrence, *_ = habit
-            creation_date = self.db_manager.get_creation_date(habit_id)
-            status = self.db_manager.get_status(habit_id)
-            completion_date = self.db_manager.get_completion_date(habit_id)
-            current_streak = self.db_manager.get_current_streak(habit_id)
-            longest_streak = self.db_manager.get_longest_streak(habit_id)
-            habit_performance = self.db_manager.get_habit_performance(habit_id, creation_date)
-
-            # Determine rank based on performance
-            rank = next((label for range_key, label in rank_mapping.items()
-                         if range_key[0] <= habit_performance < range_key[1]), "Unknown")
-
-            # Check checked_off status for the habit
-            checked_off = (self.db_manager.is_habit_checked_off_today(habit_id) if recurrence == "Daily"
-                           else self.db_manager.is_habit_checked_off_this_week(habit_id))
-            check_off_status = "Checked_Off" if checked_off else "Not Checked_Off"
-
-            # Append habit data
-            data.append([
-                name, recurrence, creation_date, status, completion_date,
-                check_off_status, current_streak, longest_streak,
-                habit_performance, rank
-            ])
-
-        # Create and display a summary table
-        df_table = Table(title="Habit Summary", header_style="blue bold", show_header=True)
-        columns = [
-            ("Name", "bright_white"), ("Recurrence", "cyan"),
-            ("Creation Date", "cyan"), ("Status", "cyan"),
-            ("Completion Date", "cyan"), ("Check_off Status", None),
-            ("Current Streak", None), ("Longest Streak", None),
-            ("% Performance", None), ("Rank", None)
-        ]
-        for col_name, col_style in columns:
-            df_table.add_column(col_name, justify="center" if col_style else "left",
-                                style=col_style, no_wrap=(col_name == "Name"))
-
-        for row in data:
-            check_off_status_style = "green" if row[5] == "Checked_Off" else "red"
-            current_streak_style = "cyan" if row[6] > 0 else "red"
-            longest_streak_style = "cyan" if row[7] > 0 else "red"
-            habit_performance_style = "green" if row[8] >= 60 else "red"
-            rank_style = "green" if row[9] in ["Outstanding", "Excellent", "Very Good"] else "red"
-
-            df_table.add_row(
-                row[0], row[1], str(row[2]), row[3] or "N/A", str(row[4]) if row[4] else "N/A",
-                f"[{check_off_status_style}]{row[5]}[/]",
-                f"[{current_streak_style}]{row[6]}[/]",
-                f"[{longest_streak_style}]{row[7]}[/]",
-                f"[{habit_performance_style}]{row[8]:.2f}%[/]",
-                f"[{rank_style}]{row[9]}[/]"
-            )
-
-        console.print(df_table)
-        return data
-
-    # CHARTS
-
-    def view_habit_streak_progress(self):
+    def view_habit_streak_progress(self, selected_habit):
         """
         Displays and plots the progress of streaks for a selected habit, including interactive visualization.
 
@@ -279,21 +204,16 @@ class HabitAnalyzer:
         and calculates streak progress based on recurrence (daily or weekly). The progress is visualized
         using a line plot where streak information is displayed interactively.
 
-        :raises ValueError: If there is an issue with fetching or formatting habit data.
-        :param self: Instance reference for the class.
-        :returns: None
         """
-        habits = self.db_manager.fetch_all_habits()
-        if not habits:
-            print("No habits found.")
+
+        if selected_habit == "Cancel":
             return
 
-        choices = [f"{habit[1]} - {habit[2]} (Recurrence: {habit[3]})" for habit in habits]
-        choice = questionary.select("Select a habit to view progress:", choices=choices + ["Cancel"]).ask()
-        if choice == "Cancel":
+        # Check whether there are any existing habits.
+        if not selected_habit:
+            self.console.print("No habits to view. You must first create a habit and progress.", style="warning")
             return
 
-        selected_habit = habits[choices.index(choice)]
         habit_id, name, description, recurrence, *_ = selected_habit
 
         # Fetch habit's check-off information
@@ -336,33 +256,33 @@ class HabitAnalyzer:
 
         # Plot progress graph with improved coloring
         fig, ax = plt.subplots(figsize=(12, 8))  # Set figure size
-        line, = ax.plot(full_date_range, streaks, marker="o", label="Streak Count", linestyle='-', color='#003f5c')
+        line, = ax.plot(full_date_range, streaks, marker="o", label="Streak Count", linestyle='-', color='olivedrab')
         ax.set_facecolor("#f7f7f7")  # Set background color
         ax.set_xlabel("Date", fontsize=14, fontweight="bold",
                       color="#333333")  # Set font size and color for x-axis label
         ax.set_ylabel("Streak", fontsize=14, fontweight="bold",
                       color="#333333")  # Set font size and color for y-axis label
-        ax.set_title(f"{name} [Streak Progress]", fontsize=16, fontweight="bold", color='#58508d')
+        ax.set_title(f"Streak Progress", fontsize=16, fontweight="bold", loc="left")
+        ax.set_title(f"Habit: {name}", fontsize=16, color="grey", loc="right")
         if recurrence == "Weekly":
-            ax.xaxis.set_major_locator(mdates.WeekdayLocator(interval=1))
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%d, %B, %y"))
+            ax.xaxis.set_major_locator(mdates.WeekdayLocator(interval=2))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%d - %b - %Y"))
         else:
-            ax.xaxis.set_major_locator(mdates.DayLocator(interval=7))
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%d, %B, %y"))
+            ax.xaxis.set_major_locator(mdates.DayLocator(interval=14))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%d - %b - %Y"))
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.spines['bottom'].set_color('#333333')
         ax.spines['left'].set_color('#333333')
         ax.tick_params(axis="x", rotation=45, labelsize=10, colors="#333333")  # Adjust tick label size and color
         ax.tick_params(axis="y", labelsize=10, colors="#333333")  # Adjust y-axis tick label size and color
-        ax.grid(color="#d4d4d4", linestyle="--", linewidth=0.6, alpha=0.7)  # Add light gridlines
         ax.legend(fontsize=12, edgecolor="#333333")  # Adjust legend style and edge color
 
         # Add interactive hover functionality
         annotation = ax.annotate(
             "", xy=(0, 0), xytext=(15, 15), textcoords="offset points",
-            bbox=dict(boxstyle="round", fc="white", edgecolor="#333333"),
-            arrowprops=dict(arrowstyle="->", color="#333333")
+            bbox=dict(boxstyle="round", fc="white", edgecolor="navajowhite"),
+            arrowprops=dict(arrowstyle="->", color="navajowhite")
         )
         annotation.set_visible(False)
 
@@ -383,45 +303,12 @@ class HabitAnalyzer:
         plt.tight_layout()
         plt.show()
 
-    def view_habit_monthly_performance(self):
+    @staticmethod
+    def calculate_performance_data(fixed_checkoff_dates, recurrence):
         """
-        Evaluates and visualizes the performance of a selected habit on a monthly basis.
-
-        This method fetches habit information from the database, calculates monthly check-offs
-        for a selected habit, and generates a bar chart to display the monthly performance.
-        The calculated performance percentage for each month is based on the habit's recurrence type
-        ("Daily" or "Weekly"). Users can interact with the visualization to view details for each
-        month through on-hover annotations.
-
-        :raises ValueError: If the input data or processing steps encounter unexpected issues.
-
-        :param self: Instance of the class that uses this method to access required components like
-            the database manager.
-
-        :return: None
+        Calculate performance data for monthly performance analysis.
+        Handles recurring habits (Daily/Weekly) and calculates percentages.
         """
-        habits = self.db_manager.fetch_all_habits()
-        if not habits:
-            print("No habits found.")
-            return
-
-        # Let user select a habit
-        choices = [f"{habit[1]} - {habit[2]} (Recurrence: {habit[3]})" for habit in habits]
-        choice = questionary.select("Select a habit to view monthly summary progress:",
-                                    choices=choices + ["Cancel"]).ask()
-        if choice == "Cancel":
-            return
-
-        selected_habit = habits[choices.index(choice)]
-        habit_id, name, description, recurrence, *_ = selected_habit
-
-        # Fetch habit's check-off information
-        checkoff_dates = self.db_manager.fetch_daily_checkoff_info(habit_id)
-        if not checkoff_dates:
-            print(f"No check-off data found for habit: {name}")
-            return
-
-        fixed_checkoff_dates = [date.fromisoformat(record[0]) for record in checkoff_dates]
         start_date = min(fixed_checkoff_dates)
         end_date = max(fixed_checkoff_dates + [date.today()])
 
@@ -439,46 +326,80 @@ class HabitAnalyzer:
             current += timedelta(days=32)
             current = current.replace(day=1)
 
-        # Sort by month keys
+        # Calculate performances
+        performances = []
         sorted_months = sorted(month_summary.keys())
-        counts = [month_summary[key] for key in sorted_months]
-        performances = [
-            (count / 31 * 100 if recurrence == "Daily" else count / 5 * 100)
-            for count in counts
-        ]
+        for month_key in sorted_months:
+            year, month = map(int, month_key.split("-"))
+            days_in_month = (date(year, month + 1, 1) - date(year, month, 1)).days if month < 12 else 31
+            if month == date.today().month and year == date.today().year:
+                days_in_month = date.today().day
+            if recurrence == "Weekly":
+                weeks_in_month = (days_in_month + date(year, month, 1).weekday()) // 7 + 1
+                performances.append((month_summary[month_key] / weeks_in_month) * 100)
+            else:  # Daily
+                performances.append((month_summary[month_key] / days_in_month) * 100)
+        return sorted_months, performances
 
-        # Configure y-axis limit based on recurrence
-        if recurrence == "Daily":
-            y_limit = 31
-        elif recurrence == "Weekly":
-            y_limit = 5
-        else:
-            y_limit = max(counts, default=0)
+    def view_habit_monthly_performance(self, selected_habit):
+        """
+        Evaluates and visualizes the performance of a selected habit on a monthly basis.
+        """
+
+        if selected_habit == "Cancel":
+            return
+
+        # Check whether there are any existing habits.
+        if not selected_habit:
+            self.console.print("No habits to view. You must first create a habit and progress.", style="warning")
+            return
+
+        habit_id, name, description, recurrence, *_ = selected_habit
+
+        # Fetch habit's check-off information
+        checkoff_dates = self.db_manager.fetch_daily_checkoff_info(habit_id)
+        if not checkoff_dates:
+            print(f"No check-off data found for habit: {name}")
+            return
+
+        fixed_checkoff_dates = [date.fromisoformat(record[0]) for record in checkoff_dates]
+        sorted_months, performances = self.calculate_performance_data(fixed_checkoff_dates, recurrence)
+
+        # Configure x-axis limit based on recurrence
+        x_limit = 31 if recurrence == "Daily" else 5
+
+        # Calculate the actual check-off counts per month
+        month_summary = {}
+        for d in fixed_checkoff_dates:
+            month_key = d.strftime("%Y-%m")
+            month_summary[month_key] = month_summary.get(month_key, 0) + 1
+
+        counts = [month_summary.get(month, 0) for month in sorted_months]
 
         # Determine bar colors based on performance
-        bar_colors = [
-            "#003f5c" if performance >= 90 else
-            "#58508d" if 65 < performance < 90 else
-            "#bc5090" if 51 <= performance <= 65 else
-            "#ff6361" if 20 <= performance < 51 else
-            "#ffa600"
-            for performance in performances
-        ]
+        import matplotlib.cm as cm
+        import matplotlib.colors as mcolors
 
-        # Plot bar graph with enhanced style
+        cmap = cm.get_cmap('RdYlGn', 100)  # Use the 'YlGn' colormap for sequential color
+        norm = mcolors.Normalize(vmin=1, vmax=100)  # Normalize performance range to 1-100
+
+        bar_colors = [mcolors.to_hex(cmap(norm(performance))) for performance in performances]
+
+        # Plot horizontal bar graph with enhanced style
         fig, ax = plt.subplots(figsize=(12, 8))
-        bars = ax.bar(sorted_months, counts, color=bar_colors, edgecolor="black", linewidth=1)
-        ax.set_ylim(0, y_limit)
-        ax.set_xlabel("Month", fontsize=14, fontweight="bold", color="#58508d")
-        ax.set_ylabel("Check-offs", fontsize=14, fontweight="bold", color="#58508d")
-        ax.set_title(f"{name} [Performance]", fontsize=16, fontweight="bold",color="#003f5c")
-        ax.grid(axis="y", linestyle="--", alpha=0.7)
+        bars = ax.barh(sorted_months, counts, color=bar_colors, edgecolor="black", linewidth=1)
+        ax.set_xlim(0, x_limit)
+        ax.set_ylabel("Month", fontsize=14, fontweight="bold")
+        ax.set_xlabel("Check-offs", fontsize=14, fontweight="bold")
+        ax.set_title(f"Monthly Performance", fontsize=16, fontweight="bold", loc="left")
+        ax.set_title(f"Habit: {name}", fontsize=16, color="grey", loc="right")
+        ax.grid(axis="x", linestyle="--", alpha=0.7)
 
-        # Convert the x-ticks to display text with the month name and year
-        months_with_year = [datetime.strptime(month, "%Y-%m").strftime("%B (%y)") for month in sorted_months]
-        ax.set_xticks(range(len(sorted_months)))
-        ax.set_xticklabels(months_with_year, rotation=45, ha="right", fontsize=11, color="#58508d")
-        ax.tick_params(axis="y", labelsize=12)
+        # Convert the y-ticks to display text with the month name and year
+        months_with_year = [datetime.strptime(month, "%Y-%m").strftime("%b - %Y") for month in sorted_months]
+        ax.set_yticks(range(len(sorted_months)))
+        ax.set_yticklabels(months_with_year, fontsize=11)
+        ax.tick_params(axis="x", labelsize=12)
         plt.tight_layout()
 
         # Add interactive hover functionality
@@ -491,16 +412,97 @@ class HabitAnalyzer:
 
         def on_hover(event):
             if event.inaxes == ax:
-                for bar, count, performance, month in zip(bars, counts, performances, sorted_months):
+                for bar, count, performance, given_month in zip(bars, counts, performances, sorted_months):
                     if bar.contains(event)[0]:
                         annotation.xy = (event.xdata, event.ydata)
                         annotation.set_text(
-                            f"Month: {month}\nCheck-offs: {count}\nPerformance: {performance:.2f}%"
+                            f"Month: {given_month}\nCheck-offs: {count}\nPerformance: {performance:.2f}%"
                         )
                         annotation.set_visible(True)
                         fig.canvas.draw_idle()
                         return
 
+            annotation.set_visible(False)
+            fig.canvas.draw_idle()
+
+        fig.canvas.mpl_connect("motion_notify_event", on_hover)
+        plt.show()
+
+    def view_all_habits_performance(self):
+        """
+        Displays a multi-line chart showing the performance of all habits over time.
+        """
+        habits = self.db_manager.fetch_all_habits()
+        if not habits:
+            self.console.print("[bold red]No habits found to display performance.[/bold red]")
+            return
+
+        # Prepare data for each habit
+        habit_data = {}
+        for habit in habits:
+            habit_id, name, description, recurrence, *_ = habit
+            checkoff_dates = self.db_manager.fetch_daily_checkoff_info(habit_id)
+            if not checkoff_dates:
+                continue
+
+            fixed_checkoff_dates = [date.fromisoformat(record[0]) for record in checkoff_dates]
+            sorted_months, performances = self.calculate_performance_data(fixed_checkoff_dates, recurrence)
+            habit_data[name] = (sorted_months, performances)
+
+        if not habit_data:
+            self.console.print("[bold yellow]No performance data available for the selected habits.[/bold yellow]")
+            return
+
+        # Plot data
+        fig, ax = plt.subplots(figsize=(14, 8))
+        ax.set_title("All Habits Performance Over Time", fontsize=16, fontweight="bold", loc="left")
+        ax.set_xlabel("Month", fontsize=14, fontweight="bold")
+        ax.set_ylabel("% Performance", fontsize=14, fontweight="bold")
+        ax.set_ylim(0, 100)  # Performance percentage range
+        ax.grid(axis="y", linestyle="--", alpha=0.7)
+
+        lines = {}
+        for habit, (months, performances) in habit_data.items():
+            months_numeric = [mdates.date2num(datetime.strptime(month, "%Y-%m")) for month in months]
+            line, = ax.plot(
+                months_numeric,
+                performances,
+                marker="o", label=habit, linestyle="-"
+            )
+            lines[line] = (months_numeric, performances, months, habit)
+
+        ax.legend(fontsize=12, loc="upper left", bbox_to_anchor=(1, 1))
+
+        # Combine and sort months from all habits for x-ticks
+        all_months = sorted(set(m for habit in habit_data.values() for m in habit[0]))
+        all_months_numeric = [mdates.date2num(datetime.strptime(month, "%Y-%m")) for month in all_months]
+        plt.xticks(
+            all_months_numeric,
+            [datetime.strptime(month, "%Y-%m").strftime("%b - %Y") for month in all_months],
+            rotation=45
+        )
+        plt.tight_layout()
+
+        # Hover functionality
+        annotation = ax.annotate(
+            "", xy=(0, 0), xytext=(15, 15), textcoords="offset points",
+            bbox=dict(boxstyle="round", fc="white", edgecolor="black"),
+            arrowprops=dict(arrowstyle="->", color="black")
+        )
+        annotation.set_visible(False)
+
+        def on_hover(event):
+            if event.inaxes == ax:
+                for l, (xdata, ydata, given_months, hab) in lines.items():
+                    if l.contains(event)[0]:
+                        for x, y, month in zip(xdata, ydata, given_months):
+                            if abs(event.xdata - x) < 0.5 and abs(event.ydata - y) < 5:
+                                annotation.set_text(
+                                    f"Habit: {hab}\nMonth: {month}\n% Performance: {y:.2f}")
+                                annotation.xy = (x, y)
+                                annotation.set_visible(True)
+                                fig.canvas.draw_idle()
+                                return
             annotation.set_visible(False)
             fig.canvas.draw_idle()
 
@@ -514,25 +516,17 @@ class HabitAnalyzer:
         It calculates the count of habits that have been checked off and those that have not within specified periods
         based on the user's choice. Then, it displays a stacked bar plot representing this data, where users can
         hover over the bars for detailed information.
-
-        :raises ValueError: If there are no active habits found matching the recurrence type selected.
-        :raises RuntimeError: If no habits exist in the database with the desired filtering criteria.
-
-        :param self: An instance of the class containing the `db_manager` dependency and methods
-                     for accessing database operations related to habits.
-                     Also required for interacting with the console output.
-
-        :returns: None. This function creates a bar graph visualization and shows it using matplotlib.
         """
-        habits = self.db_manager.fetch_all_active_habits()
+
+        habits = self.db_manager.fetch_all_habits()
         if not habits:
-            console.print("[bold red]No active habits found.[/bold red]")
+            self.console.print("No habits found.", style="warning")
             return
 
         # Prompt user to choose between daily or weekly view
         recurrence_type = questionary.select(
             "Choose the type of habits to view recent activity:",
-            choices=["Daily", "Weekly", "Cancel"]
+            choices=["Daily", "Weekly", "Cancel"], style=self.custom_style
         ).ask()
         if recurrence_type == "Cancel":
             return
@@ -540,7 +534,7 @@ class HabitAnalyzer:
         # Filter habits by selected recurrence
         filtered_habits = [habit for habit in habits if habit[3] == recurrence_type]
         if not filtered_habits:
-            console.print(f"[bold red]No active habits with {recurrence_type.lower()} recurrence found.[/bold red]")
+            self.console.print(f"No active habits with {recurrence_type.lower()} recurrence found.", style="warning")
             return
 
         # Define period and dates/weeks to track
@@ -596,19 +590,18 @@ class HabitAnalyzer:
                                       label="Not Checked Off", width=bar_width, edgecolor="black")
 
         # Configure plot
-        title = f"Check-off Recent Activity [Last {'14 Days' if recurrence_type == 'Daily' else '2 Months'}]"
-        ax.set_title(title, fontsize=16, fontweight="bold", color="#003f5c")
-        ax.set_xlabel("Date" if recurrence_type == "Daily" else "Week", fontsize=14, fontweight="bold", color="#58508d")
-        ax.set_ylabel("Number of Habits", fontsize=14, fontweight="bold", color="#58508d")
+        title = f"Last {'14 Days' if recurrence_type == 'Daily' else '2 Months'}"
+        ax.set_title(f"Check-off Recent Activity", fontsize=16, fontweight="bold", loc="left")
+        ax.set_title(title, fontsize=16, color="silver", loc="right")
+        ax.set_xlabel("Date" if recurrence_type == "Daily" else "Week", fontsize=14, fontweight="bold")
+        ax.set_ylabel("Active Habits", fontsize=14, fontweight="bold")
         ax.set_xticks(x)
         if recurrence_type == "Daily":
-            ax.set_xticklabels([day.strftime("%d-%b") for day in tracked_period], rotation=45, fontsize=12,
-                               color="#58508d")
+            ax.set_xticklabels([day.strftime("%d-%b") for day in tracked_period], rotation=45, fontsize=12)
         else:
-            ax.set_xticklabels([f"Week {week[1]}" for week in tracked_period], rotation=45, fontsize=12,
-                               color="#58508d")
+            ax.set_xticklabels([f"Week {week[1]}" for week in tracked_period], rotation=45, fontsize=12)
         ax.set_yticks(range(0, max(checked_off_counts + not_checked_off_counts) + 1, 1))
-        ax.tick_params(axis="y", labelsize=12, colors="#58508d")
+        ax.tick_params(axis="y", labelsize=12)
         ax.yaxis.set_minor_locator(plt.MultipleLocator(1))
         ax.grid(axis="y", linestyle="--", linewidth=0.6, color="#d4d4d4", alpha=0.7)
         ax.spines['top'].set_visible(False)
@@ -620,7 +613,7 @@ class HabitAnalyzer:
         # Add interactive hover functionality
         annotation = ax.annotate(
             "", xy=(0, 0), xytext=(15, 15), textcoords="offset points",
-            bbox=dict(boxstyle="round", fc="white", edgecolor="black"),
+            bbox=dict(boxstyle="round", fc="white", edgecolor="#58508d"),
             arrowprops=dict(arrowstyle="->", color="black")
         )
         annotation.set_visible(False)
@@ -630,7 +623,7 @@ class HabitAnalyzer:
                 for bar, looped_period in zip(bars_checked_off, tracked_period):
                     if bar.contains(event)[0]:
                         annotation.xy = (event.xdata, event.ydata)
-                        annotation.set_text(f"Date: {looped_period}\nChecked Off Habits:\n" +
+                        annotation.set_text(f"Date: {looped_period}\nChecked Off:\n" +
                                             ("\n".join(checked_off_habits[looped_period]) or "None"))
                         annotation.set_visible(True)
                         fig.canvas.draw_idle()
@@ -639,7 +632,7 @@ class HabitAnalyzer:
                 for bar, looped_period in zip(bars_not_checked_off, tracked_period):
                     if bar.contains(event)[0]:
                         annotation.xy = (event.xdata, event.ydata)
-                        annotation.set_text(f"Date: {looped_period}\nNot Checked Off Habits:\n" +
+                        annotation.set_text(f"Date: {looped_period}\nNot Checked Off:\n" +
                                             ("\n".join(not_checked_off_habits[looped_period]) or "None"))
                         annotation.set_visible(True)
                         fig.canvas.draw_idle()

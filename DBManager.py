@@ -11,13 +11,6 @@ class DatabaseManager:
     and interacts with an SQLite database to store and retrieve habit-related data.
     It provides methods for creating tables, inserting, updating, deleting data,
     and performing advanced queries for habit tracking and analytics purposes.
-
-    :ivar db_name: Name of the SQLite database file.
-    :type db_name: str
-    :ivar connection: SQLite connection object for the database.
-    :type connection: sqlite3.Connection
-    :ivar cursor: Cursor object for executing database operations.
-    :type cursor: sqlite3.Cursor
     """
     def __init__(self, db_name='main.db'):
         self.db_name = db_name
@@ -54,9 +47,21 @@ class DatabaseManager:
         self.cursor.execute(query, params)
         return self.cursor.fetchall()
 
-    def __del__(self):
-        """Ensures the connection is closed when Database is deleted."""
+    def delete_database(self):
+        """Deletes the database file unconditionally."""
         self.connection.close()
+        import os
+        if os.path.exists(self.db_name):
+            os.remove(self.db_name)
+
+    def delete_empty_database(self):
+        """Deletes the database file only if it is empty."""
+        # Check if both tables are empty
+        habit_count = self.fetch_all("SELECT COUNT(*) FROM habit")[0][0]
+        checkoff_count = self.fetch_all("SELECT COUNT(*) FROM checkoff")[0][0]
+
+        if habit_count == 0 and checkoff_count == 0:
+            self.delete_database()
 
     # HABIT MANAGEMENT
 
@@ -76,6 +81,10 @@ class DatabaseManager:
         """Delete a habit and its check-offs from the database."""
         self.execute_query("DELETE FROM checkoff WHERE habit_id = ?", (habit_id,))
         self.execute_query("DELETE FROM habit WHERE id = ?", (habit_id,))
+
+    def delete_check_offs(self, habit_id):
+        """Delete all check-offs for a given habit."""
+        self.execute_query("DELETE FROM checkoff WHERE habit_id = ?", (habit_id,))
 
     def add_checkoff_entry(self, habit_id, checkoff_date):
         """Add a check-off entry."""
@@ -101,17 +110,19 @@ class DatabaseManager:
         query = "SELECT * FROM habit WHERE status = 'active'"
         return self.fetch_all(query)
 
-    def fetch_all_complete_habits(self):
-        """Retrieve all completed habits."""
-        query = "SELECT * FROM habit WHERE status = 'complete'"
-        return self.fetch_all(query)
-
     def get_data_from_last_created_habit(self):
         """Retrieve all data of the last created habit."""
         query = "SELECT * FROM habit WHERE id = (SELECT MAX(id) FROM habit)"
         result = self.fetch_all(query)
         return result[0] if result else None
+    
+    def get_habit_id_from_last_habit(self):
+        """Retrieve the ID of the last created habit."""
+        query = "SELECT id FROM habit WHERE id = (SELECT MAX(id) FROM habit)"
+        result = self.fetch_all(query)
+        return result[0][0] if result else None
 
+     
     def get_creation_date(self, habit_id):
         """Retrieve the creation date of a habit."""
         query = "SELECT creation_date FROM habit WHERE id = ?"
@@ -190,7 +201,10 @@ class DatabaseManager:
 
         current_date = date.today()
         for checkoff in checkoffs:
-            checkoff_date = date.fromisoformat(checkoff[0])
+            try:
+                checkoff_date = date.fromisoformat(checkoff[0].split("T")[0])
+            except ValueError:
+                continue
             if checkoff_date == current_date:
                 current_streak += 1
                 current_date -= increment
@@ -209,7 +223,10 @@ class DatabaseManager:
         previous_date = None
 
         for checkoff in checkoffs:
-            checkoff_date = date.fromisoformat(checkoff[0])
+            try:
+                checkoff_date = date.fromisoformat(checkoff[0].split("T")[0])
+            except ValueError:
+                continue
 
             if recurrence == 'Daily':
                 increment = timedelta(days=1)
