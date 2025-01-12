@@ -1,12 +1,12 @@
 import time
 
 import questionary
+from prompt_toolkit.styles import Style
 from rich.console import Console
 from rich.theme import Theme
-from prompt_toolkit.styles import Style
 
-from DBManager import DatabaseManager
 from Analyze import HabitAnalyzer
+from DBManager import DatabaseManager
 from HabitManager import HabitManager
 
 
@@ -49,21 +49,49 @@ class Menu:
         self.manager = HabitManager(text_enrichment())
         self.console, self.custom_style = text_enrichment()
 
-
     def welcome(self):
         if self.db_manager.fetch_all_habits():  # If there is data in database, Welcome Back the User
             self.console.print("[size=18]\n[][][] *** Welcome back!! *** [][][][/size]\n", style="title")
             time.sleep(1)
         else:  # If there isn't Apply Welcome Script
             self.console.print("[size=18]\n[][][] ***  Welcome to your Habit Tracker !! *** [][][][/size]\n",
-                          style="title")
-            self.console.print("\nLet me set up a few pre-defined habits "
-                "for you, so you can get a better look and feel of the.", style="info")
+                               style="title")
             time.sleep(3)
+            self.console.print("Since this is your first time, shall we take a quick tour?!\n", style="info")
+            time.sleep(3)
+            self.console.print("Navigating through the App is very straightforward.", style="info")
+            time.sleep(3)
+            self.console.print("Simply use your keyboard 'Up' and 'Down' arrows while selecting from the menu "
+                               "options and type in your keyboard your inputs when prompted.\n", style="info")
+            time.sleep(5)
+            self.console.print("From the main menu you can choose to:\n", style="info")
+            time.sleep(3)
+            self.console.print("- \t Get started straight away creating your new habits!\n", style="info")
+            time.sleep(3)
+            self.console.print("- \t You can access the 'Manage your Habits' submenu, where you can checkoff, "
+                               "edit, delete or complete your habits!\n", style="info")
+            time.sleep(6)
+            self.console.print("- \t Or you can access the 'Analyze your Habits' menu, where you can track your "
+                               "habits' performance; view a summary of your habits, your streaks, or even see how your "
+                               "habits fare through different chart visualizations!\n", style="info")
+            time.sleep(6)
+            self.console.print("- \t You can, of course, exit the application at any time.\n", style="info")
+            time.sleep(3)
+            self.console.print("There is a lot more to it, but I promised you a quick tour but you wouldn't "
+                               "want all the spoilers, right?", style="info")
+            time.sleep(4)
+            self.console.print("\nFor now, let me set up a few pre-defined habits for you, so you have months "
+                               "worth of data to explore the App and get the real look and feel!", style="info")
+            time.sleep(6)
             self.console.print("\nSetting up 5 predefined habits...", style="processing")
-            self.manager.create_predefined_habits()  # Create predefined habits
-            time.sleep(2)
-            self.console.print("All predefined habits set up successfully!\n", style="success")
+            time.sleep(3)
+            try:
+                self.manager.create_predefined_habits()  # Create predefined habits
+                self.console.print("All predefined habits set up successfully!\n", style="success")
+            except Exception as e:
+                self.console.print(f"An error occurred while setting up predefined habits: {e}", style="error")
+            time.sleep(4)
+            self.console.print("Let's get started!\n\n", style="info")
 
     def select_habit(self, status):
         """ Selects a habit from the database based on user input. """

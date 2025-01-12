@@ -195,8 +195,8 @@ class HabitManager:
 
         predefined_habits = [
             {
-                "name": "Drink 1.5l of Water",
-                "description": "Keep Hydrated",
+                "name": "Drink Water (2 ltrs)",
+                "description": "Keep hydrated and healthy",
                 "recurrence": "Daily",
                 "creation_date": six_months_ago.date(),
                 "num_checkoffs": 130,
@@ -204,7 +204,7 @@ class HabitManager:
             },
             {
                 "name": "Have a Siesta",
-                "description": "Reset the brain after work",
+                "description": "Reset the brain after lunch",
                 "recurrence": "Daily",
                 "creation_date": four_months_ago.date(),
                 "num_checkoffs": 73,
@@ -227,7 +227,7 @@ class HabitManager:
                 "min_streak_length": 1,
             },
             {
-                "name": "Run",
+                "name": "Go for a Run",
                 "description": "Go for daily run in the mountains",
                 "recurrence": "Daily",
                 "creation_date": six_months_ago.date(),

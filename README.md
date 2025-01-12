@@ -61,18 +61,23 @@ Note that the user can then choose to sort the summary table by any of the attri
 
 Then from the *Charts Menu*, the user can select from different chart types to view their progress. These chart images are interactive (including mouseover functionality) and can be saved locally.
 
+*Chart: Habit Performance*
 ![Habit Performance](Images/habit_performance.png "Habit Performance")
 
+*Chart: All Habits Performance*
 ![All Habits Performance](Images/all_habits_performance_monthly_progress.png "All Habits Performance")
 
+*Chart: Streak Progress*
 ![Streak Progress](Images/streak_progress.png "Streak Progress")
 
+*Chart: Recent Check-off Activity - Daily Habits*
 ![Recent Check-off Activity - Daily](Images/checkoff_recent_activity_daily_habits.png "Recent Check-off Activity - Daily Habits")
 
+*Chart: Recent Check-off Activity - Weekly Habits*
 ![Recent Check-off Activity - Weekly Habits](Images/checkoff_recent_activity_weekly_habits.png "Recent Check-off Activity - Weekly Habits")
 
-In essence, the user may complement the information displayed between the different chart type to answers various questions, such as:
-- ***How has Habit X improved (or declined) over time?*** The 'Habit Performance' chart will provide good visuals on the habits progress since its creation.
+In essence, the user may complement the information displayed between the different chart types to answers various questions, such as:
+- ***How has Habit X improved (or declined) over time?*** The 'Habit Performance' chart will provide good visuals on the habit's progress since its creation.
 - ***How did Habit X perform against other habits?*** The 'All Habits Performance' view may very well show any potential correlation in an improvement/decline against others. E.g. in the month of June most habits declined. Turns out the user went on holiday and wasn't able to keep up with their habits.
 - ***When exactly do my streaks break?*** the Streak Progress chart may very well display the user tends to break a habit on weekends and may consequently account and plan for that in the future, should they choose to improve the habit's performance.
 - ***How consistent have I been over the past few days/weeks?*** The Check-off Recent Activity charts will easily display on which habits the ball has been dropped or which habits have been checked-off.
@@ -81,7 +86,7 @@ In essence, the user may complement the information displayed between the differ
 ## 4. Testing
 
 ## 5. Known Limitations / Issues
-For this project's simplistic nature and logic, some features have been thought of and considered but not put in place at this stage which can either have an impact on the realistic side of the app, or may instead be simply expansion opportunities. These include:
+Due to this project's simplistic nature and logic, some features have been thought of and considered but not put in place, at this stage, which can either have an impact on the realistic side of the app, or may instead be simply considered an expansion opportunity. These include:
 - User related features: Multiple user creation; login features; first time user validation...
 - Advanced habit tracking: setting up targets; flexible recurrences (not being strict to Daily vs Weekly); completion summary...
 - Storing and reverting decisions: delete a check-off if the user accidentally checked-off; deleting a habit makes it irreversible and is fully removed from db...
