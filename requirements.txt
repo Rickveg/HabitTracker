@@ -1,0 +1,4 @@
+questionary
+rich
+prompt-toolkit
+matplotlib
