@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="bb4f8777-d635-4ebb-be8c-3723194a9680" name="Changes" comment="Update Test_Database.py" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Rickveg&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Rickveg/HabitTracker.git&quot;,
+    &quot;accountId&quot;: &quot;a1dba61f-ee0d-49ec-b853-dc12179f4840&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="2qfeRnelN3EPJE7AAtmiHnaublX" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Python tests.Python tests in Test_Database.py.executor": "Run",
+    "Python tests.Python tests in test_HabitManager.py.executor": "Run",
+    "Python tests.Python tests in test_database.py.executor": "Run",
+    "Python tests.Python tests in test_habit.py.executor": "Coverage",
+    "Python tests.Python tests in test_habit_management.py.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/ricar/OneDrive/Ricardo Merrill/4. Studies/4. Coding Projects/1. Python/PyCharm/HabitTracker",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\ricar\OneDrive\Ricardo Merrill\4. Studies\4. Coding Projects\1. Python\PyCharm\HabitTracker" />
+      <recent name="C:\Users\ricar\OneDrive\Ricardo Merrill\4. Studies\4. Coding Projects\1. Python\PyCharm\HabitTracker\Tests" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Python tests in Test_Database.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="HabitTracker" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/Test_Database.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python tests.Python tests in Test_Database.py" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-PY-243.22562.220" />
+        <option value="bundled-python-sdk-0fc6c617c4bd-9a18a617cbe4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.22562.220" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bb4f8777-d635-4ebb-be8c-3723194a9680" name="Changes" comment="" />
+      <created>1735058050841</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1735058050841</updated>
+      <workItem from="1735058051998" duration="7194000" />
+      <workItem from="1735118242593" duration="13779000" />
+      <workItem from="1735232165497" duration="3450000" />
+      <workItem from="1735630575374" duration="3283000" />
+      <workItem from="1735736140906" duration="9032000" />
+      <workItem from="1735756608680" duration="13623000" />
+      <workItem from="1735836693322" duration="6808000" />
+      <workItem from="1735848778902" duration="3766000" />
+      <workItem from="1735891350425" duration="15834000" />
+      <workItem from="1735927229344" duration="619000" />
+      <workItem from="1735928252753" duration="1678000" />
+      <workItem from="1735940952259" duration="7045000" />
+      <workItem from="1735997413940" duration="2895000" />
+      <workItem from="1736166914178" duration="2380000" />
+      <workItem from="1736181738162" duration="5478000" />
+      <workItem from="1736269668416" duration="17547000" />
+      <workItem from="1736491866551" duration="3140000" />
+      <workItem from="1736586367671" duration="7053000" />
+      <workItem from="1736593516181" duration="7700000" />
+      <workItem from="1736620943112" duration="852000" />
+      <workItem from="1736621958961" duration="11000" />
+      <workItem from="1736622311976" duration="15501000" />
+      <workItem from="1736778741812" duration="9205000" />
+      <workItem from="1736924688659" duration="570000" />
+      <workItem from="1736946808047" duration="4247000" />
+    </task>
+    <task id="LOCAL-00001" summary="Initial Commit">
+      <option name="closed" value="true" />
+      <created>1735064367097</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1735064367097</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Initial Commit">
+      <option name="closed" value="true" />
+      <created>1736619403578</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1736619403578</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Upload Readme file">
+      <option name="closed" value="true" />
+      <created>1736685612668</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1736685612668</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Upload requirements.txt">
+      <option name="closed" value="true" />
+      <created>1736687195708</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1736687195708</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Updated classes and README.md">
+      <option name="closed" value="true" />
+      <created>1736710800368</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1736710800368</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Updated classes and README.md">
+      <option name="closed" value="true" />
+      <created>1736947602101</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1736947602101</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Update gitignore">
+      <option name="closed" value="true" />
+      <created>1736947753473</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1736947753473</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Update gitignore">
+      <option name="closed" value="true" />
+      <created>1736950940770</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1736950940770</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Update Test_Database.py">
+      <option name="closed" value="true" />
+      <created>1736950976769</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1736950976769</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial Commit" />
+    <MESSAGE value="Upload Readme file" />
+    <MESSAGE value="Upload requirements.txt" />
+    <MESSAGE value="Updated classes and README.md" />
+    <MESSAGE value="Update gitignore" />
+    <MESSAGE value="Update Test_Database.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update Test_Database.py" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/HabitManager_py$.coverage" NAME=" Coverage Results" MODIFIED="1736778884030" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/DBManager_py$.coverage" NAME=" Coverage Results" MODIFIED="1736950302118" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
