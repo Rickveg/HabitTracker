@@ -1,0 +1,15 @@
+Index: .idea/.name
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>DBManager.py
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/.name b/.idea/.name
+--- a/.idea/.name	(revision 1c01c0d7b4a1e4ed84c2212f77e5f702f8840928)
++++ b/.idea/.name	(date 1736953396157)
+@@ -1,1 +1,1 @@
+-DBManager.py
+\ No newline at end of file
++Test_Database.py
+\ No newline at end of file

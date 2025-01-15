@@ -1,0 +1,9 @@
+<changelist name="Uncommitted_changes_before_Update_at_15_01_2025_15_36_[Changes]" date="1736951819025" recycled="false" toDelete="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_15_01_2025_15_36_[Changes]/shelved.patch" />
+  <option name="DESCRIPTION" value="Update dependencies in requirements.txt." />
+  <binary>
+    <option name="BEFORE_PATH" value="main.db" />
+    <option name="AFTER_PATH" value="main.db" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_15_01_2025_15_36_[Changes]/main.db" />
+  </binary>
+</changelist>
