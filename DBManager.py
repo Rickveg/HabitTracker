@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import date, datetime, timedelta, timezone
+import os
 
 
 class DatabaseManager:
@@ -46,6 +47,12 @@ class DatabaseManager:
         """Fetches all results for a query."""
         self.cursor.execute(query, params)
         return self.cursor.fetchall()
+    
+    def delete_database(self):
+        """Closes the database connection and deletes the associated database file."""
+        self.connection.close()
+        if os.path.exists(self.db_name):
+            os.remove(self.db_name)
     
     def empty_database(self):
         """Clears all rows from tables and resets primary keys when both tables are empty."""

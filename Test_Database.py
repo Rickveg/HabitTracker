@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 
 from DBManager import DatabaseManager
-from HabitManager import Habit, HabitManager
+from HabitManager import Habit
 
 
 class TestHabit:
