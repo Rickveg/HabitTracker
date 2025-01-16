@@ -46,22 +46,16 @@ class DatabaseManager:
         """Fetches all results for a query."""
         self.cursor.execute(query, params)
         return self.cursor.fetchall()
-
-    def delete_database(self):
-        """Deletes the database file unconditionally."""
-        self.connection.close()
-        import os
-        if os.path.exists(self.db_name):
-            os.remove(self.db_name)
-
-    def delete_empty_database(self):
-        """Deletes the database file only if it is empty."""
-        # Check if both tables are empty
+    
+    def empty_database(self):
+        """Clears all rows from tables and resets primary keys when both tables are empty."""
         habit_count = self.fetch_all("SELECT COUNT(*) FROM habit")[0][0]
         checkoff_count = self.fetch_all("SELECT COUNT(*) FROM checkoff")[0][0]
-
+    
         if habit_count == 0 and checkoff_count == 0:
-            self.delete_database()
+            self.execute_query("DELETE FROM habit")
+            self.execute_query("DELETE FROM checkoff")
+            self.execute_query("DELETE FROM sqlite_sequence WHERE name IN ('habit', 'checkoff')")
 
     # HABIT MANAGEMENT
 

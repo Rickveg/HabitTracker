@@ -148,10 +148,10 @@ class HabitManager:
             ).ask():
                 self.db_manager.delete_habit(selected_habit[0])
                 self.console.print(f"The habit '{selected_habit[1]}' has been successfully deleted.", style="success")
-                # Delete database if there are no habits left
+                # Delete all empty rows in database tables when there are no habits left
                 if not self.db_manager.fetch_all_habits():
-                    self.db_manager.delete_empty_database()
-                    self.console.print("All habits have been deleted. Database has been deleted.", style="success")
+                    self.db_manager.empty_database()
+                    self.console.print("All habits have been deleted. Database has been reset.", style="success")
             else:
                 self.console.print("Deletion canceled.", style="warning")
         except Exception as e:
