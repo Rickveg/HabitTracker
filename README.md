@@ -84,6 +84,9 @@ In essence, the user may complement the information displayed between the differ
 - ***...***
 
 ## 4. Testing
+From your terminal execute the command (ensure path directory is where testing files are):
+
+        pytest
 
 ## 5. Known Limitations / Issues
 Due to this project's simplistic nature and logic, some features have been thought of and considered but not put in place, at this stage, which can either have an impact on the realistic side of the app, or may instead be simply considered an expansion opportunity. These include:
